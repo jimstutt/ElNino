@@ -1,3 +1,5 @@
+> {-# LANGUAGE ScopedTypeVariables #-}
+
 > import Control.Applicative ((<$>))
 > import Data.Array
 > import Statistics.Distribution hiding (stdDev)
@@ -10,6 +12,7 @@
 > import qualified Data.ByteString as B
 > import qualified Data.ByteString.Lazy as L
 > import qualified Data.Vector.Unboxed as U
+> import System.Random
 
 * [NCAR Atmos](http://goo.gl/1PtQXG)
 
@@ -38,9 +41,22 @@ Temperature grid
 
 Seasonal trends are detrended by subtracting the yearly mean temperature from the particular day's temperature.
 
-> temp day =  temp yr day - sum [temp' yr day]/yrs where
->   temp' yr day = fmap $ lookup yr day table
->   yrs = [1878..2014]
+>-- This tells you how much “hotter it is today than it usually is here at this time of year”.
+
+> l = array ((1,20),(1,20)) [i,j|i<-[-5.0,-2.5,0,2.5,5.0],j<-[-5.0,-2.5,0,2.5,5.0]]
+> temps = array ((1,365),(1,207),(1,207) [1..365]
+
+> temp l y d temps = temps l y d - (sum temps l y d)/n where
+>   temp' l y d where
+>     ds = [1..365] 
+
+I assume that when d+τd+\tau exceeds 365 you go over to the next year, since that’s the reasonable thing to do.
+
+The point is that X(ℓ,y,τ)X(\ell,y, \tau) tells you how much the temperature at grid point ℓ\ell is correlated to the temperature at grid point rr, τ\tau days later, during year yy.
+
+> temp1 day =  temp' yr day - fmap $ sum [temp' (head yrs) day : temp' (tail yrs)]/yrs where
+>   temp' yr day = 
+>   yrs = [1971..2014]
 >   days = [1..365] 
 
 where n = total number of years observed.
@@ -51,10 +67,12 @@ l and r are a pair of sites on the grid.
 > tMin = -365
 > tRange = [tMin..tMax] -- days
 
-> ccorr yr l r = _ -- (temp yr l day)*(temp yr r (day+tShift)
+> ccorr yr l r = do
+>   let sh = (temp yr l day)*(temp yr r (day+tShift) where
+>     tShift = if tShift < 0 then ((-)1)*tShift else tShift
+>   return tShift 
 
-   | tShift >  0 = temp yr l day * temp yr r (day+tShift)
-   | tShift <= 0 = ccorr yr l day -- | tShift > 0
+tShifts are always positive.
 
 So there's no difference between the cases!?
 
@@ -80,8 +98,8 @@ Significant links are defined only as pairs l and r which have a link correlatio
 
 This is represented as a Heaviside function:
 
-> rho yr l r = theta * (cStrength yr l r - threshStrength) where -- (1)
->   theta = 0.1
+> rho yr l r = theta  (cStrength yr l r - threshStrength) where -- (1)
+>   theta = heaviside
 >   threshStrength = 2
 
 For different years pairs might or might not be significant and thus "blink" as the appear and disappear.
@@ -95,6 +113,8 @@ I do not understand, aren't they closed and complementary and thus mutually-defi
 Blinking links are taken as correlated with structural change.
 
 For a currently existing (ie. significant) link ($$rho$$, was it significant in the past?
+
+>-- table = new Array (3,3) [1891..2014]
 
 
 
