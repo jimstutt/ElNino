@@ -1,5 +1,21 @@
-Start with comprehensible names using type aliases with a comprehensible type vocabulary. The aliased types will make coordinate conversions easier.
+> module ENParams where
 
+> earth25x25 = undefined
+
+> type Cell = Int
+
+Yamasaki et al. (2013) 
+
+* 43 years (1981-2013)
+
+Data assimilation
+
+So where did  444*21 come from? TBD. 
+* 365 days
+* 10512 temperatures
+
+
+Start with comprehensible names using type aliases with a comprehensible type vocabulary. The aliased types will make coordinate conversions easier.
 
 worldwide daily average temperatures on a 
 
@@ -7,7 +23,15 @@ worldwide daily average temperatures on a
 
 2.5 degree latitude × 2.5 degree longitude grid (144 × 73 grid points), 
 
-> band = [144*73] -- 2.5 x 2.5 deg. grid
+> band = [144*73] -- 10512 grid points 2.5 x 2.5 deg. grid
+> bandCells = [1..10512]
+
+
+
+> latLongToCell :: Lat -> Long -> Cell
+> latLongToCell lat long = undefined  
+>-- cellToLatLong = Cell -> (Lat,Long)
+>-- cellToLatLong c = undefined
 
 {JS.
 
@@ -57,7 +81,7 @@ The image of the basin has only 9 grid points coloured in. If we include the app
 > testLocCount = 14+193 -- 207
 
 > maxCoords = 207 -- (14,183)
-> timeShift = [-200,-201..200] -- originally tau
+> timeShift = [(-200),(-201)..200] -- originally tau
 
 Unfortunately we do need absolute positions because of different angles of insolation at different positions
 
@@ -72,57 +96,34 @@ lats longs where
 
 coords = coords {lat::Double}
 
-
 >-- lats,longs :: U.Vector a
-> testLats  = [45.0,47.5..165.0] -- 125 points. Sanity check circum = 40000 km => 111.1111 km/deg
-> testLongs = [-20.0,-17.5..30.0] -- 21 points
+> testLats  = [45,47..165] -- 125 points. Sanity check circum = 40000 km => 111.1111 km/deg
+> testLongs = [-20,-17..30] -- 21 points
 
-
-
-Graham Jones wrote:
-
-NOAA seem to use the convention of heading east from Greenwich. But I see John says El Nino is area 5°S-5°N and 170°-120°W. That’s 190°E- 300°E. I think.
-
-{JS.
-
-  5-(-5) = 10 deg lat
-
-          0EW 
-       /      \
-     90W  ==   90E
-       \       /
-         180WE
-
-  170W - 120W = 50 deg long.
-  170W == 190E
-  120W == 240E
-
-Graham had:
-  
-  300E - 190E = 110 deg long.
-  300E == 60W
-  190E == 170W
-
-But:
-
-  240E = 120W not 60.
-
-* John Denker has a great argument for using the geometric algebra to avoid the inclinometer problem in aerobatics when you loop the loop. (He's an advisor the the US Aero Admin on aerobatics and his technical book is great fun even for a non-pilot.
-
-
-> type Years = [Int]
+> type Years = [Year]
 > years :: Years
-> years = [2013]
-> type Days = [Int]
+> type Year = Int
+> yearsJustOne = [2013]
+
+> type Days = [Day]
 > days :: Days
 > days = [1..365]
+> type Day = Int
 
 > type Lats = [Lat]
-> type Lat = Float
+> type Lat = Int
 > type Longs = [Long]
-> type Long = Float
+> type Long = Int
 > type Locs = [Loc]
-> type Loc = (Float,Float)
->-- type Temps = Array U (Z :. ) Temp
+> type Loc = (Lat,Long)
 > type Temp = Double
+
+> type Cov = Double
+> type CrossCov = Double
+> type Corr = Double
+> type CrossCorr = Double
+> type SSTAnoms = [SSTAnom]
+> type SSTAnom = Double
+
+* John Denker has a great argument for using the geometric algebra to avoid the inclinometer problem in aerobatics when you loop the loop. (He's an advisor the the US Aero Admin on aerobatics and he's the author of *the* book on the subject.)
 
